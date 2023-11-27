@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:m10/camera.dart'; // Import your CameraScreen file
 import 'package:m10/contact.dart';
-import 'package:m10/photo_screen.dart'; // Import your PhotoScreen file
 import 'package:permission_handler/permission_handler.dart';
 
 class Screen extends StatefulWidget {
@@ -27,13 +27,13 @@ class _ScreenState extends State<Screen> {
     }
   }
 
-  void photos() async {
+  void camera() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Permission"),
-          content: Text("Allow access to photos?"),
+          content: Text("Allow access to the camera?"),
           actions: [
             TextButton(
               onPressed: () {
@@ -42,10 +42,20 @@ class _ScreenState extends State<Screen> {
               child: Text("No"),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop(); // Close the dialog
-                // Handle 'Yes' action here
-                // You can navigate to PhotoScreen or perform any other actions
+                var cameraStatus = await Permission.camera.status;
+                if (cameraStatus.isGranted) {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
+                } else {
+                  var status = await Permission.camera.request();
+                  print(status);
+                  if (status == PermissionStatus.granted) {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
+                  } else if (status == PermissionStatus.permanentlyDenied) {
+                    openAppSettings();
+                  }
+                }
               },
               child: Text("Yes"),
             ),
@@ -90,9 +100,9 @@ class _ScreenState extends State<Screen> {
               child: Text("Contact"),
             ),
             ElevatedButton(
-              onPressed: () => photos(),
-              child: Text("Photos"),
-            ), // Changed from "Camera" to "Photos"
+              onPressed: () => camera(),
+              child: Text("Camera"),
+            ),
             ElevatedButton(
               onPressed: () {
                 if (noButtonPressedCount < 2) {
@@ -111,10 +121,20 @@ class _ScreenState extends State<Screen> {
                             child: Text("No"),
                           ),
                           TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.of(context).pop(); // Close the dialog
-                              // Handle 'Yes' action here
-                              // You can navigate to PhotoScreen or perform any other actions
+                              var cameraStatus = await Permission.camera.status;
+                              if (cameraStatus.isGranted) {
+                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
+                              } else {
+                                var status = await Permission.camera.request();
+                                print(status);
+                                if (status == PermissionStatus.granted) {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
+                                } else if (status == PermissionStatus.permanentlyDenied) {
+                                  openAppSettings();
+                                }
+                              }
                             },
                             child: Text("Yes"),
                           ),
