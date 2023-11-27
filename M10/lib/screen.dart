@@ -42,6 +42,37 @@ class _ScreenState extends State<Screen> {
     }
   }
 
+  void camera() async {
+    int deniedCount = 0;
+
+    while (deniedCount < 3) {
+      if (await Permission.camera.status.isGranted) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
+        return; // Exit the method if permission is granted
+      } else {
+        var status = await Permission.camera.request();
+        print(status);
+        if (status == PermissionStatus.granted) {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => CameraScreen()));
+          return; // Exit the method if permission is granted
+        } else if (status == PermissionStatus.permanentlyDenied) {
+          showSettingsDialog(); // Show dialog to navigate to settings
+          return; // Exit the method as settings will be handled separately
+        } else if (status == PermissionStatus.denied) {
+          deniedCount++;
+          if (deniedCount == 3) {
+            showSettingsDialog(); // Show dialog to navigate to settings after 3 denied attempts
+          } else {
+            bool result = await showConfirmationDialog(); // Show confirmation dialog for 'Yes' or 'No'
+            if (!result) {
+              return; // Exit the method if 'No' is selected
+            }
+          }
+        }
+      }
+    }
+  }
+
   Future<bool> showConfirmationDialog() async {
     return await showDialog(
       context: context,
@@ -92,11 +123,6 @@ class _ScreenState extends State<Screen> {
         );
       },
     );
-  }
-
-  void camera() async {
-    // Similar logic as contact() method
-    // Modify as needed
   }
 
   @override
