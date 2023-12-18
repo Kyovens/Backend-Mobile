@@ -54,40 +54,42 @@ class _MainScreenState extends State<MainScreen> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: ElevatedButton(
-                  onPressed: () {
-                    _loadInterstisialAdd();
-                    if(_isInterstitialReady) {
-                      _interstitialAd.show();
-                    }
-                  },
-                  child: Text("Interstitial Ads")),
+                onPressed: () {
+                  _loadInterstisialAdd();
+                },
+                child: Text("Interstitial Ads"),
+              ),
             ),
             Padding(
               padding: EdgeInsets.all(8.0),
-              child:
-                  ElevatedButton(onPressed: () {
-                    _loadRewardedAd();
-                    if(_isRewardedReady) {
-                      _rewardedAd.show(
-                        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
-                          setState(() {
-                            coin +=1;
-                          });
+              child: ElevatedButton(
+                onPressed: () {
+                  _loadRewardedAd();
+                  if (_isRewardedReady) {
+                    _rewardedAd.show(
+                      onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+                        setState(() {
+                          coin += 1;
                         });
-                    }
-                  }, child: Text("Rewarded Ads")),
+                      },
+                    );
+                  }
+                },
+                child: Text("Rewarded Ads"),
+              ),
             ),
             Expanded(
-                child: _isBannerReady
-                    ? Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                          width: _bannerAd.size.width.toDouble(),
-                          height: _bannerAd.size.height.toDouble(),
-                          child: AdWidget(ad: _bannerAd),
-                        ),
-                      )
-                    : Container())
+              child: _isBannerReady
+                  ? Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: _bannerAd.size.width.toDouble(),
+                        height: _bannerAd.size.height.toDouble(),
+                        child: AdWidget(ad: _bannerAd),
+                      ),
+                    )
+                  : Container(),
+            )
           ],
         ),
       ),
@@ -118,37 +120,59 @@ class _MainScreenState extends State<MainScreen> {
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
               print("Close Interstitial Add");
+              // Navigate to the new screen after the ad is dismissed
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SecondScreen()),
+              );
             },
           );
           setState(() {
             _isInterstitialReady = true;
             _interstitialAd = ad;
           });
+          // Show the interstitial ad when it's loaded
+          ad.show();
         }, onAdFailedToLoad: (err) {
           _isInterstitialReady = false;
           _interstitialAd.dispose();
         }));
   }
-  
-  void _loadRewardedAd() {
-    RewardedAd.load(adUnitId: "ca-app-pub-3940256099942544/5224354917", request: AdRequest(), rewardedAdLoadCallback: RewardedAdLoadCallback(onAdLoaded: (ad) {
-      ad.fullScreenContentCallback = FullScreenContentCallback(
-        onAdDismissedFullScreenContent: (ad) {
-          setState(() {
-            ad.dispose();
-            _isRewardedReady = false;
-          });
-          _loadRewardedAd();
-        }
-      );
 
-      setState(() {
-        _isRewardedReady = true;
-        _rewardedAd = ad;
-      });
-    }, onAdFailedToLoad: (err) {
-      _isRewardedReady = false;
-      _rewardedAd.dispose();
-    }));
+  void _loadRewardedAd() {
+    RewardedAd.load(
+        adUnitId: "ca-app-pub-3940256099942544/5224354917",
+        request: AdRequest(),
+        rewardedAdLoadCallback: RewardedAdLoadCallback(onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+            setState(() {
+              ad.dispose();
+              _isRewardedReady = false;
+            });
+            _loadRewardedAd();
+          });
+          setState(() {
+            _isRewardedReady = true;
+            _rewardedAd = ad;
+          });
+        }, onAdFailedToLoad: (err) {
+          _isRewardedReady = false;
+          _rewardedAd.dispose();
+        }));
+  }
+}
+
+class SecondScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Second Screen"),
+      ),
+      body: Center(
+        child: Text("This is the second screen."),
+      ),
+    );
   }
 }
