@@ -89,7 +89,16 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     )
                   : Container(),
-            )
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  _showInterstitialBeforeNavigate();
+                },
+                child: Text("Go to Home"),
+              ),
+            ),
           ],
         ),
       ),
@@ -120,19 +129,12 @@ class _MainScreenState extends State<MainScreen> {
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
               print("Close Interstitial Add");
-              // Navigate to the new screen after the ad is dismissed
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SecondScreen()),
-              );
             },
           );
           setState(() {
             _isInterstitialReady = true;
             _interstitialAd = ad;
           });
-          // Show the interstitial ad when it's loaded
-          ad.show();
         }, onAdFailedToLoad: (err) {
           _isInterstitialReady = false;
           _interstitialAd.dispose();
@@ -161,17 +163,30 @@ class _MainScreenState extends State<MainScreen> {
           _rewardedAd.dispose();
         }));
   }
+
+  void _showInterstitialBeforeNavigate() {
+    _loadInterstisialAdd();
+    if (_isInterstitialReady) {
+      _interstitialAd.show();
+    } else {
+      // If the interstitial ad is not ready, navigate directly
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    }
+  }
 }
 
-class SecondScreen extends StatelessWidget {
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Second Screen"),
+        title: Text("Home Screen"),
       ),
       body: Center(
-        child: Text("This is the second screen."),
+        child: Text("This is the home screen."),
       ),
     );
   }
