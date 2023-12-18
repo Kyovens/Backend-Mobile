@@ -6,6 +6,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final adsManager = context.watch<AdsManager>();
+    InterstitialAd? interstitialAd;
 
     return Scaffold(
       appBar: AppBar(
@@ -18,7 +19,7 @@ class MainScreen extends StatelessWidget {
             if (adsManager.showInterstitialAds)
               ElevatedButton(
                 onPressed: () {
-                  _showInterstitialBeforeNavigate(context);
+                  _showInterstitialBeforeNavigate(context, interstitialAd);
                 },
                 child: Text("Go to Home with Ads"),
               ),
@@ -66,14 +67,19 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  void _showInterstitialBeforeNavigate(BuildContext context) {
+  void _showInterstitialBeforeNavigate(
+      BuildContext context, InterstitialAd? interstitialAd) {
     final adsManager = context.read<AdsManager>();
 
     // Load and show interstitial ad
-    // ... (Your interstitial ad loading and showing logic)
+    interstitialAd = InterstitialAd(
+      adUnitId: "your_interstitial_ad_unit_id",
+      request: AdRequest(),
+      listener: AdListener(),
+    );
 
-    // When the interstitial ad is dismissed, navigate to HomeScreen
-    // Set the callback to null to avoid unwanted navigation on subsequent dismissals
+    interstitialAd!.load();
+
     interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
         // Navigate to the HomeScreen after the interstitial ad is dismissed
