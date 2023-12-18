@@ -55,27 +55,9 @@ class _MainScreenState extends State<MainScreen> {
               padding: EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: () {
-                  _loadInterstisialAdd();
+                  _showInterstitialBeforeNavigate();
                 },
-                child: Text("Interstitial Ads"),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _loadRewardedAd();
-                  if (_isRewardedReady) {
-                    _rewardedAd.show(
-                      onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
-                        setState(() {
-                          coin += 1;
-                        });
-                      },
-                    );
-                  }
-                },
-                child: Text("Rewarded Ads"),
+                child: Text("Go to Home"),
               ),
             ),
             Expanded(
@@ -89,15 +71,6 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     )
                   : Container(),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _showInterstitialBeforeNavigate();
-                },
-                child: Text("Go to Home"),
-              ),
             ),
           ],
         ),
@@ -126,11 +99,6 @@ class _MainScreenState extends State<MainScreen> {
         adUnitId: "ca-app-pub-3940256099942544/1033173712",
         request: AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {
-              print("Close Interstitial Add");
-            },
-          );
           setState(() {
             _isInterstitialReady = true;
             _interstitialAd = ad;
@@ -167,6 +135,17 @@ class _MainScreenState extends State<MainScreen> {
   void _showInterstitialBeforeNavigate() {
     _loadInterstisialAdd();
     if (_isInterstitialReady) {
+      _interstitialAd.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          // Navigate to the HomeScreen after the interstitial ad is dismissed
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+          );
+          // Set the callback to null to avoid unwanted navigation on subsequent dismissals
+          _interstitialAd.fullScreenContentCallback = null;
+        },
+      );
       _interstitialAd.show();
     } else {
       // If the interstitial ad is not ready, navigate directly
