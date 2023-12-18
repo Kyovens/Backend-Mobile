@@ -60,16 +60,40 @@ class _MainScreenState extends State<MainScreen> {
                 child: Text("Go to Home"),
               ),
             ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  _loadRewardedAd();
+                  if (_isRewardedReady) {
+                    _rewardedAd.show(
+                      onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+                        setState(() {
+                          coin += 1;
+                        });
+                        if (coin == 10) {
+                          // Assuming 10 coins represent 10000 rupiah payment
+                          context.read<AdsManager>().hideAds();
+                        }
+                      },
+                    );
+                  }
+                },
+                child: Text("Pay 10000 Rupiah to Remove Ads"),
+              ),
+            ),
             Expanded(
-              child: _isBannerReady
-                  ? Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: _bannerAd.size.width.toDouble(),
-                        height: _bannerAd.size.height.toDouble(),
-                        child: AdWidget(ad: _bannerAd),
-                      ),
-                    )
+              child: context.watch<AdsManager>().showAds
+                  ? _isBannerReady
+                      ? Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            width: _bannerAd.size.width.toDouble(),
+                            height: _bannerAd.size.height.toDouble(),
+                            child: AdWidget(ad: _bannerAd),
+                          ),
+                        )
+                      : Container()
                   : Container(),
             ),
           ],
